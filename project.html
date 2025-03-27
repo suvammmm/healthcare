@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Medical Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo h2 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            margin-top: 30px;
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .user-profile {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 24px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .page-title p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            width: 300px;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            padding: 5px 10px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .search-bar i {
+            color: var(--gray);
+        }
+
+        /* Patient Profile Section */
+        .patient-profile {
+            display: flex;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .profile-left {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8fafc;
+            text-align: center;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            margin-bottom: 10px;
+        }
+
+        .profile-name h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .profile-name p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .profile-details {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-item h4 {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 3px;
+        }
+
+        .detail-item p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .profile-right {
+            flex: 1;
+            padding: 25px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .section-title h3 {
+            font-size: 18px;
+            color: var(--dark);
+        }
+
+        .section-title a {
+            color: var(--primary);
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .tab-container {
+            margin-bottom: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray);
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Appointment Card */
+        .appointment-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .appointment-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .appointment-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-confirmed {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+
+        .appointment-details {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        .detail-col {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Medical Records */
+        .record-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .record-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .record-date {
+            color: var(--gray);
+            font-size: 13px;
+        }
+
+        .record-details {
+            margin-top: 10px;
+        }
+
+        .record-details p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Prescription */
+        .prescription-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .prescription-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .prescription-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .prescription-date {
+            color: var(--gray);
+            font-size: 13px;
+        }
+
+        .medication-list {
+            margin-top: 15px;
+        }
+
+        .medication-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .medication-item:last-child {
+            border-bottom: none;
+        }
+
+        .medication-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(79, 195, 247, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .medication-details {
+            flex: 1;
+        }
+
+        .medication-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .medication-dosage {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .medication-instruction {
+            font-size: 13px;
+            color: var(--dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+                overflow: hidden;
+            }
+            .logo h2, .logo p, .nav-item span, .user-info {
+                display: none;
+            }
+            .nav-item {
+                justify-content: center;
+                padding: 15px 0;
+            }
+            .nav-item i {
+                margin-right: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
+            .nav-menu {
+                display: flex;
+                margin-top: 15px;
+            }
+            .nav-item {
+                padding: 10px 15px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            .nav-item:hover, .nav-item.active {
+                border-left: none;
+                border-bottom: 3px solid var(--accent);
+            }
+            .user-profile {
+                position: static;
+                margin-top: 15px;
+                justify-content: center;
+            }
+            .patient-profile {
+                flex-direction: column;
+            }
+            .profile-left {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            .appointment-details {
+                flex-direction: column;
+            }
+            .detail-col {
+                margin-bottom: 10px;
+            }
+        }
+        .emergency-btn-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .emergency-btn {
+            background-color: #43dc35;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(28, 195, 87, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .emergency-btn:hover {
+            background-color: #3cc823;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 189, 82, 0.5);
+        }
+        
+        .emergency-btn:active {
+            transform: translateY(0);
+        }
+        
+        .emergency-btn i {
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .emergency-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>MediCare</h2>
+                <p>Hospital Management System</p>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <a href="project4.html">
+                <div class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </div>
+                </a>
+                <div class="nav-item">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Patients</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Medical Records</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <span>Pharmacy</span>
+                </div><a href="project3.html">
+                <div class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span href="project3.html">Reports</span>
+                    
+                </div>
+                </a>
+                <div class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">JD</div>
+                <div class="user-info">
+                    <h4>Dr. John Doe</h4>
+                    <p>Cardiologist</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="page-title">
+                    <h1>Patient Dashboard</h1>
+                    <p>View and manage patient details, appointments, and medical records</p>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search patient...">
+                </div>
+            </div>
+
+            <!-- Patient Profile -->
+            <div class="patient-profile">
+                <div class="profile-left">
+                    <div class="profile-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Patient Avatar">
+                    </div>
+                    <div class="profile-name">
+                        <h2>Sarah Johnson</h2>
+                        <p>Patient ID: MED123456</p>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <h4>Age</h4>
+                            <p>34 years</p>
+                        </div>
+                        <div class="detail-item">
+                            <h4>Gender</h4>
+                            <p>Female</p>
+                        </div>
+                        <div class="detail-item">
+                            <h4>Blood Type</h4>
+                            <p>O+</p>
+                        </div>
+                        <div class="detail-item">
+                            <h4>Last Visit</h4>
+                            <p>May 15, 2023</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-right">
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="appointments">Appointments</div>
+                            <div class="tab" data-tab="records">Medical Records</div>
+                            <div class="tab" data-tab="prescriptions">Prescriptions</div>
+                        </div>
+
+                        <!-- Appointments Tab -->
+                        <div class="tab-content active" id="appointments">
+                            <div class="section-title">
+                                <h3>Upcoming Appointments</h3>
+                                <a href="#">View All</a>
+                            </div>
+                            
+                            <div class="appointment-card">
+                                <div class="appointment-header">
+                                    <div class="appointment-title">Cardiology Consultation</div>
+                                    <div class="appointment-status status-confirmed">Confirmed</div>
+                                </div>
+                                <div class="appointment-details">
+                                    <div class="detail-col">
+                                        <div class="detail-label">Date & Time</div>
+                                        <div class="detail-value">June 10, 2023 at 10:30 AM</div>
+                                    </div>
+                                    <div class="detail-col">
+                                        <div class="detail-label">Doctor</div>
+                                        <div class="detail-value">Dr. John Doe</div>
+                                    </div>
+                                    <div class="detail-col">
+                                        <div class="detail-label">Location</div>
+                                        <div class="detail-value">Cardiology Dept, Room 205</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="appointment-card">
+                                <div class="appointment-header">
+                                    <div class="appointment-title">Annual Physical Exam</div>
+                                    <div class="appointment-status status-pending">Pending</div>
+                                </div>
+                                <div class="appointment-details">
+                                    <div class="detail-col">
+                                        <div class="detail-label">Date & Time</div>
+                                        <div class="detail-value">June 25, 2023 at 2:00 PM</div>
+                                    </div>
+                                    <div class="detail-col">
+                                        <div class="detail-label">Doctor</div>
+                                        <div class="detail-value">Dr. Emily Smith</div>
+                                    </div>
+                                    <div class="detail-col">
+                                        <div class="detail-label">Location</div>
+                                        <div class="detail-value">General Medicine, Room 101</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Records Tab -->
+                        <div class="tab-content" id="records">
+                            <div class="section-title">
+                                <h3>Medical History</h3>
+                                <a href="#">View All</a>
+                            </div>
+                            
+                            <div class="record-card">
+                                <div class="record-header">
+                                    <div class="record-title">Cardiology Consultation</div>
+                                    <div class="record-date">May 15, 2023</div>
+                                </div>
+                                <div class="record-details">
+                                    <p><strong>Diagnosis:</strong> Mild hypertension, no signs of arrhythmia</p>
+                                    <p><strong>Notes:</strong> Patient reports occasional chest discomfort during physical activity. Blood pressure readings slightly elevated at 140/90. Recommended lifestyle changes including reduced sodium intake and regular exercise.</p>
+                                    <p><strong>Follow Up:</strong> Schedule follow-up in 3 months to monitor blood pressure.</p>
+                                </div>
+                            </div>
+
+                            <div class="record-card">
+                                <div class="record-header">
+                                    <div class="record-title">Annual Physical Exam</div>
+                                    <div class="record-date">January 10, 2023</div>
+                                </div>
+                                <div class="record-details">
+                                    <p><strong>Diagnosis:</strong> Healthy, no significant findings</p>
+                                    <p><strong>Notes:</strong> Routine physical examination completed. All vitals within normal range. Blood work shows slightly elevated cholesterol (LDL 130). Discussed dietary recommendations.</p>
+                                    <p><strong>Follow Up:</strong> Annual exam recommended.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prescriptions Tab -->
+                        <div class="tab-content" id="prescriptions">
+                            <div class="section-title">
+                                <h3>Current Medications</h3>
+                                <a href="#">View All</a>
+                            </div>
+                            
+                            <div class="prescription-card">
+                                <div class="prescription-header">
+                                    <div class="prescription-title">Active Prescriptions</div>
+                                    <div class="prescription-date">Last Updated: May 15, 2023</div>
+                                </div>
+                                <div class="medication-list">
+                                    <div class="medication-item">
+                                        <div class="medication-icon">
+                                            <i class="fas fa-pills"></i>
+                                        </div>
+                                        <div class="medication-details">
+                                            <div class="medication-name">Lisinopril</div>
+                                            <div class="medication-dosage">10mg tablet, once daily</div>
+                                            <div class="medication-instruction">Take in the morning with water. May cause dizziness when standing up quickly.</div>
+                                        </div>
+                                    </div>
+                                    <div class="medication-item">
+                                        <div class="medication-icon">
+                                            <i class="fas fa-pills"></i>
+                                        </div>
+                                        <div class="medication-details">
+                                            <div class="medication-name">Atorvastatin</div>
+                                            <div class="medication-dosage">20mg tablet, once daily at bedtime</div>
+                                            <div class="medication-instruction">Take with water. Avoid grapefruit products. Report any muscle pain or weakness.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" style="margin-top: 30px;">
+                                <h3>Precautions & Recommendations</h3>
+                            </div>
+                            <div class="record-card">
+                                <div class="record-details">
+                                    <p><strong>Diet:</strong> Low sodium diet recommended (less than 2,300mg per day). Increase intake of fruits, vegetables, and whole grains. Limit saturated fats and cholesterol.</p>
+                                    <p><strong>Exercise:</strong> Moderate aerobic exercise for at least 30 minutes most days of the week. Walking, swimming, or cycling recommended.</p>
+                                    <p><strong>Lifestyle:</strong> Stress management techniques recommended. Limit alcohol to 1 drink per day. Smoking cessation strongly advised.</p>
+                                    <p><strong>Monitoring:</strong> Check blood pressure weekly and record readings. Follow up if systolic >140 or diastolic >90 persists.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="emergency-btn-container">
+        <button class="emergency-btn" onclick="window.location.href='emergency1.html'">
+            <i class="fas fa-exclamation-triangle"></i> Back
+        </button>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Simulate loading data
+            setTimeout(() => {
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.innerHTML = '<p>Loading patient data...</p>';
+                loadingIndicator.style.textAlign = 'center';
+                loadingIndicator.style.padding = '20px';
+                document.querySelector('.profile-right').prepend(loadingIndicator);
+
+                setTimeout(() => {
+                    loadingIndicator.remove();
+                }, 1500);
+            }, 500);
+        });
+
+        // In a real application, you would fetch patient data from an API here
+        // For example:
+        /*
+        async function fetchPatientData(patientId) {
+            try {
+                const response = await fetch(`/api/patients/${patientId}`);
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error('Error fetching patient data:', error);
+            }
+        }
+        */
+    </script>
+</body>
+</html>
