@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Health Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .report-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: var(--light);
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .patient-info-item {
+            flex: 1;
+            padding: 0 15px;
+        }
+
+        .patient-info-item h3 {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .patient-info-item p {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .report-section {
+            padding: 25px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            font-size: 20px;
+            color: var(--secondary);
+        }
+
+        .time-filter {
+            display: flex;
+            align-items: center;
+        }
+
+        .time-filter label {
+            margin-right: 10px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .time-filter select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--light-gray);
+            background-color: white;
+            font-size: 14px;
+        }
+
+        .graph-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .graph-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--light-gray);
+        }
+
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .graph-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .graph-unit {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .graph-wrapper {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        .metrics-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid var(--light-gray);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .metric-change {
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .change-positive {
+            color: var(--success);
+        }
+
+        .change-negative {
+            color: var(--danger);
+        }
+
+        .change-neutral {
+            color: var(--gray);
+        }
+
+        .doctor-notes {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .doctor-notes h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .doctor-notes p {
+            line-height: 1.6;
+            color: var(--dark);
+        }
+
+        .print-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 25px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .print-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+            .report-container {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .patient-info {
+                flex-direction: column;
+            }
+            .patient-info-item {
+                margin-bottom: 15px;
+            }
+            .graph-container {
+                grid-template-columns: 1fr;
+            }
+            .metrics-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metrics-summary {
+                grid-template-columns: 1fr;
+            }
+            .graph-card {
+                padding: 15px;
+            }
+        }
+        .emergency-btn-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .emergency-btn {
+            background-color: #43dc35;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(28, 195, 87, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .emergency-btn:hover {
+            background-color: #3cc823;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 189, 82, 0.5);
+        }
+        
+        .emergency-btn:active {
+            transform: translateY(0);
+        }
+        
+        .emergency-btn i {
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .emergency-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1>Patient Health Report</h1>
+            <p>Comprehensive overview of patient health metrics and trends</p>
+        </div>
+
+        <div class="patient-info">
+            <div class="patient-info-item">
+                <h3>Patient Name</h3>
+                <p>Sarah Johnson</p>
+            </div>
+            <div class="patient-info-item">
+                <h3>Patient ID</h3>
+                <p>MED123456</p>
+            </div>
+            <div class="patient-info-item">
+                <h3>Date of Birth</h3>
+                <p>May 15, 1989 (34 years)</p>
+            </div>
+            <div class="patient-info-item">
+                <h3>Report Period</h3>
+                <p>January 2023 - June 2023</p>
+            </div>
+        </div>
+
+        <div class="report-section">
+            <div class="section-title">
+                <h2>Vital Signs Trends</h2>
+                <div class="time-filter">
+                    <label for="vitalTimePeriod">Time Period:</label>
+                    <select id="vitalTimePeriod">
+                        <option value="3">Last 3 Months</option>
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="12">Last 12 Months</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">Blood Pressure</div>
+                        <div class="graph-unit">mmHg</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="bpChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">Heart Rate</div>
+                        <div class="graph-unit">beats per minute</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="hrChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <div class="metric-label">Current Blood Pressure</div>
+                    <div class="metric-value">128/82</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 12% improvement
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Current Heart Rate</div>
+                    <div class="metric-value">72</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 8% improvement
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Average BP (6 months)</div>
+                    <div class="metric-value">134/86</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 9% improvement
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Average HR (6 months)</div>
+                    <div class="metric-value">75</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 6% improvement
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-notes">
+                <h3>Physician's Notes</h3>
+                <p>Patient shows significant improvement in blood pressure control since starting Lisinopril. Resting heart rate has also decreased to normal range. Continue current medication regimen and lifestyle modifications. Patient reports better sleep quality and energy levels since last visit.</p>
+            </div>
+        </div>
+
+        <div class="report-section">
+            <div class="section-title">
+                <h2>Metabolic Health</h2>
+                <div class="time-filter">
+                    <label for="metabolicTimePeriod">Time Period:</label>
+                    <select id="metabolicTimePeriod">
+                        <option value="3">Last 3 Months</option>
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="12">Last 12 Months</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">Cholesterol Levels</div>
+                        <div class="graph-unit">mg/dL</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="cholChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">Blood Glucose</div>
+                        <div class="graph-unit">mg/dL</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="glucoseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <div class="metric-label">Current LDL</div>
+                    <div class="metric-value">110</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 15% improvement
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Current HDL</div>
+                    <div class="metric-value">55</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-up"></i> 10% improvement
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Fasting Glucose</div>
+                    <div class="metric-value">92</div>
+                    <div class="metric-change change-neutral">
+                        No significant change
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">HbA1c</div>
+                    <div class="metric-value">5.4%</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 0.3% improvement
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-notes">
+                <h3>Physician's Notes</h3>
+                <p>Cholesterol levels have improved significantly with Atorvastatin therapy. LDL now within target range. HDL continues to improve with regular exercise. Glucose levels remain stable with no signs of insulin resistance. Continue current treatment plan.</p>
+            </div>
+        </div>
+
+        <div class="report-section">
+            <div class="section-title">
+                <h2>Body Composition</h2>
+                <div class="time-filter">
+                    <label for="bodyTimePeriod">Time Period:</label>
+                    <select id="bodyTimePeriod">
+                        <option value="3">Last 3 Months</option>
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="12">Last 12 Months</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">Weight Trend</div>
+                        <div class="graph-unit">kilograms</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <div class="graph-title">BMI Trend</div>
+                        <div class="graph-unit">kg/m²</div>
+                    </div>
+                    <div class="graph-wrapper">
+                        <canvas id="bmiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <div class="metric-label">Current Weight</div>
+                    <div class="metric-value">68 kg</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 5% reduction
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Current BMI</div>
+                    <div class="metric-value">24.1</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 5% reduction
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Waist Circumference</div>
+                    <div class="metric-value">82 cm</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 3 cm reduction
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Body Fat %</div>
+                    <div class="metric-value">28%</div>
+                    <div class="metric-change change-positive">
+                        <i class="fas fa-arrow-down"></i> 2% reduction
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-notes">
+                <h3>Physician's Notes</h3>
+                <p>Patient has achieved steady weight loss through dietary changes and increased physical activity. BMI now in healthy range. Continue current exercise regimen and Mediterranean diet. Patient reports feeling more energetic and mobile with weight loss.</p>
+            </div>
+        </div>
+
+        <button class="print-btn" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+    </div>
+    <div class="emergency-btn-container">
+    <button class="emergency-btn" onclick="window.location.href='project.html'">
+        <i class="fas fa-exclamation-triangle"></i> Back
+    </button>
+</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Common months data
+            const months6 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const months3 = ['Apr', 'May', 'Jun'];
+            const months12 = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+            // Initialize all charts
+            const bpChart = initBPChart();
+            const hrChart = initHRChart();
+            const cholChart = initCholChart();
+            const glucoseChart = initGlucoseChart();
+            const weightChart = initWeightChart();
+            const bmiChart = initBMIChart();
+
+            // Set up event listeners for time period selectors
+            document.getElementById('vitalTimePeriod').addEventListener('change', function() {
+                updateCharts([bpChart, hrChart], this.value);
+            });
+
+            document.getElementById('metabolicTimePeriod').addEventListener('change', function() {
+                updateCharts([cholChart, glucoseChart], this.value);
+            });
+
+            document.getElementById('bodyTimePeriod').addEventListener('change', function() {
+                updateCharts([weightChart, bmiChart], this.value);
+            });
+
+            // Chart initialization functions
+            function initBPChart() {
+                const ctx = document.getElementById('bpChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months6,
+                        datasets: [
+                            {
+                                label: 'Systolic',
+                                data: [142, 138, 135, 132, 130, 128],
+                                borderColor: '#4a6fa5',
+                                backgroundColor: 'rgba(74, 111, 165, 0.1)',
+                                tension: 0.3,
+                                fill: true,
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Diastolic',
+                                data: [92, 90, 88, 86, 84, 82],
+                                borderColor: '#4fc3f7',
+                                backgroundColor: 'rgba(79, 195, 247, 0.1)',
+                                tension: 0.3,
+                                fill: true,
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: getChartOptions('Blood Pressure (mmHg)')
+                });
+            }
+
+            function initHRChart() {
+                const ctx = document.getElementById('hrChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months6,
+                        datasets: [{
+                            label: 'Resting Heart Rate',
+                            data: [78, 76, 75, 74, 73, 72],
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: getChartOptions('Heart Rate (bpm)')
+                });
+            }
+
+            function initCholChart() {
+                const ctx = document.getElementById('cholChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months6,
+                        datasets: [
+                            {
+                                label: 'LDL',
+                                data: [145, 138, 130, 125, 118, 110],
+                                backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'HDL',
+                                data: [42, 45, 48, 50, 52, 55],
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: getChartOptions('Cholesterol (mg/dL)', true)
+                });
+            }
+
+            function initGlucoseChart() {
+                const ctx = document.getElementById('glucoseChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months6,
+                        datasets: [{
+                            label: 'Fasting Glucose',
+                            data: [95, 94, 93, 93, 92, 92],
+                            borderColor: '#6f42c1',
+                            backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: getChartOptions('Glucose (mg/dL)')
+                });
+            }
+
+            function initWeightChart() {
+                const ctx = document.getElementById('weightChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months6,
+                        datasets: [{
+                            label: 'Weight',
+                            data: [71.5, 70.8, 70.2, 69.5, 68.8, 68.0],
+                            borderColor: '#166088',
+                            backgroundColor: 'rgba(22, 96, 136, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: getChartOptions('Weight (kg)')
+                });
+            }
+
+            function initBMIChart() {
+                const ctx = document.getElementById('bmiChart').getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months6,
+                        datasets: [{
+                            label: 'BMI',
+                            data: [25.4, 25.1, 24.9, 24.6, 24.4, 24.1],
+                            borderColor: '#fd7e14',
+                            backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: getChartOptions('BMI (kg/m²)')
+                });
+            }
+
+            // Common chart options
+            function getChartOptions(title, isBar = false) {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: title
+                        },
+                        tooltip: {
+                            mode: isBar ? 'index' : 'nearest',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            padding: 12,
+                            cornerRadius: 4
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                padding: 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                padding: 10
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 4,
+                            hoverRadius: 6,
+                            backgroundColor: 'white',
+                            borderWidth: 2
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                };
+            }
+
+            // Update charts based on time period
+            function updateCharts(charts, period) {
+                let newMonths;
+                if (period === '3') newMonths = months3;
+                else if (period === '6') newMonths = months6;
+                else newMonths = months12;
+
+                charts.forEach(chart => {
+                    chart.data.labels = newMonths;
+                    
+                    // Update data based on period
+                    chart.data.datasets.forEach(dataset => {
+                        if (dataset.label === 'Systolic') {
+                            dataset.data = getDataForPeriod([142, 138, 135, 132, 130, 128], period);
+                        } else if (dataset.label === 'Diastolic') {
+                            dataset.data = getDataForPeriod([92, 90, 88, 86, 84, 82], period);
+                        } else if (dataset.label === 'Resting Heart Rate') {
+                            dataset.data = getDataForPeriod([78, 76, 75, 74, 73, 72], period);
+                        } else if (dataset.label === 'LDL') {
+                            dataset.data = getDataForPeriod([145, 138, 130, 125, 118, 110], period);
+                        } else if (dataset.label === 'HDL') {
+                            dataset.data = getDataForPeriod([42, 45, 48, 50, 52, 55], period);
+                        } else if (dataset.label === 'Fasting Glucose') {
+                            dataset.data = getDataForPeriod([95, 94, 93, 93, 92, 92], period);
+                        } else if (dataset.label === 'Weight') {
+                            dataset.data = getDataForPeriod([71.5, 70.8, 70.2, 69.5, 68.8, 68.0], period);
+                        } else if (dataset.label === 'BMI') {
+                            dataset.data = getDataForPeriod([25.4, 25.1, 24.9, 24.6, 24.4, 24.1], period);
+                        }
+                    });
+                    
+                    chart.update();
+                });
+            }
+
+            function getDataForPeriod(baseData, period) {
+                if (period === '3') return baseData.slice(-3);
+                if (period === '6') return baseData;
+                if (period === '12') {
+                    // For 12 months, we'll simulate more data points
+                    const startValue = baseData[0] * 1.1;
+                    const monthlyChange = (baseData[0] - baseData[baseData.length-1]) / 6;
+                    const fullYearData = [];
+                    
+                    // First 6 months (Jul-Dec)
+                    for (let i = 0; i < 6; i++) {
+                        fullYearData.push(Math.round((startValue - (i * monthlyChange)) * 10) / 10);
+                    }
+                    
+                    // Last 6 months (Jan-Jun from baseData)
+                    fullYearData.push(...baseData);
+                    
+                    return fullYearData;
+                }
+                return baseData;
+            }
+        });
+    </script>
+    <a href="project.html">back to home</a>
+</body>
+</html>
